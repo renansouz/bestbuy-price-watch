@@ -1,53 +1,93 @@
-# BestBuy Price Watch (Canada) 🍁
+# Best Buy Price Watch (Canada)🍁
 
-A lightweight price-alert service for BestBuy.ca products. Users submit a SKU or product URL and a target price; the system checks prices once per day and sends email alerts when the target is met.
+A simple, focused service to notify users when a BestBuy.ca product reaches a target price. I built this to track SKUs or product URLs, run daily price checks against the Best Buy Products API, and send email alerts with unsubscribe links.
 
-## Main topics
+## Why
 
-* **Overview**
+Many customers ask when an item will go on sale. This repo is a small, production-minded implementation that solves that exact need while staying compliant with Best Buy policies by using the public API.
 
-  * Purpose: Notify users when a Best Buy Canada product reaches a specified price.
-  * Source: Best Buy Products API (preferred). Avoid scraping unless you have written permission.
+## What it does
 
-* **Features**
+* Accepts alerts by SKU or BestBuy.ca URL.
+* Stores minimal data: email, sku, target price, active flag.
+* Runs a daily, batched check of active SKUs.
+* Sends email notifications when price <= target.
+* Provides an unsubscribe link that deactivates the alert.
 
-  * Create alerts by SKU or URL
-  * Daily, batched price checks
-  * Email notifications with unsubscribe links
-  * Minimal user data stored (email, sku, target price)
+## Tech choices
 
-* **Tech stack (suggested)**
+* Frontend: Next.js + React + TypeScript. Use API routes for server side operations.
+* Backend: Node.js + TypeScript. Serverless functions or a small API server are fine.
+* Database: Firestore or Supabase.
+* Email: SendGrid or Mailgun.
+* Scheduler: GitHub Actions cron or Cloud Scheduler.
 
-  * Frontend: Next.js + React + TypeScript
-  * Backend: Node.js + TypeScript (API routes / serverless)
-  * Database: Firestore or Supabase
-  * Email: SendGrid or Mailgun
-  * Scheduler: GitHub Actions cron or Cloud Scheduler
+## Quick start
 
-* **Quick setup (summary)**
+1. Clone the repo and install dependencies.
 
-  1. Clone repo and install dependencies.
-  2. Add required environment variables (BESTBUY\_API\_KEY, SENDGRID\_API\_KEY, DB credentials, APP\_HOST).
-  3. Run dev server: `npm run dev`.
-  4. Deploy and configure scheduler to run the daily job.
+```bash
+git clone https://github.com/<you>/bestbuy-price-watch.git
+cd bestbuy-price-watch
+npm install
+```
 
-* **Environment variables (example)**
+2. Create `.env.local` with these variables:
 
-  * `BESTBUY_API_KEY`, `SENDGRID_API_KEY`, `EMAIL_FROM`, `APP_HOST`, plus DB credentials.
+```
+BESTBUY_API_KEY=
+SENDGRID_API_KEY=
+EMAIL_FROM=
+APP_HOST=
+# DB credentials depending on your choice
+```
 
-* **Scheduler**
+3. Run the dev server
 
-  * Run once per day. Batch SKUs to reduce API calls. Use GitHub Actions or a cloud scheduler.
+```bash
+npm run dev
+```
 
-* **Legal**
+4. Deploy and configure a daily scheduler to run the price check job.
 
-  * Use the Best Buy API where possible. Do not scrape BestBuy.ca without explicit permission. Comply with privacy rules when storing emails.
+## API endpoints (examples)
 
-* **Contributing & License**
+* `POST /api/alerts`  Create an alert. Body: `{ email, sku, targetPrice }`.
+* `GET /api/unsubscribe?token=...`  Deactivate the alert linked to the token.
+* Internal: `GET /api/bestbuy/price?sku=...`  Fetch product data from Best Buy API.
 
-  * Fork, create a feature branch, open a pull request.
-  * MIT License.
+## Data model
 
-* **Contact**
+`alerts` collection
 
-  * Open an issue or contact the repository owner.
+* id: string
+* userEmail: string
+* sku: string
+* targetPrice: number
+* currency: string (default CAD)
+* createdAt: timestamp
+* active: boolean
+* unsubscribeToken: string
+
+Optional `trackedSkus` collection to cache lastPrice and lastChecked.
+
+## Scheduler and batching
+
+Batch SKUs to reduce API calls. The Best Buy API supports queries like `products(sku in(111,222))`. Run once per day unless you have a use case that needs higher frequency.
+
+## Legal and privacy notes
+
+* Use the Best Buy Products API where possible. Do not scrape BestBuy.ca without written permission.
+* Store only what you need. If you plan to handle many users, add privacy, retention and data deletion policies.
+
+## Contributing
+
+If you want to contribute, open an issue or a pull request. Keep changes small and include tests for business logic where appropriate.
+
+## License
+
+MIT
+
+## Contact
+
+Open an issue or reach me at the contact on my GitHub profile.

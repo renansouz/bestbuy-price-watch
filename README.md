@@ -1,4 +1,4 @@
-# Best Buy Price Watch (Canada)🍁
+# Best Buy Canada Price Watch 🍁
 
 A simple, focused service to notify users when a BestBuy.ca product reaches a target price. I built this to track SKUs or product URLs, run daily price checks against the Best Buy Products API, and send email alerts with unsubscribe links.
 
